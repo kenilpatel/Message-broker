@@ -12,12 +12,17 @@ from tkinter import *
 import sys
 import os
 from tkinter import font
+from tkinter import simpledialog
 ''' Started the GUI '''
 root = Tk()
 ''' This vaiable stores the name of client and sends it to server'''
 name = StringVar()
 ''' This is the main thread that is gonna handle the communication with the
  server '''
+download = 0
+upload = 0
+upload_num = 0
+data_from_server = ""
 
 
 class myThread(threading.Thread):
@@ -87,11 +92,28 @@ class myThread(threading.Thread):
                     elif(msg == 200):
                         ''' server is normally communicating with the client
                      no special instruction given by server '''
+                        global download, upload
+                        if(download == 1):
+                            download = 0
+                            data = pickle.dumps("download:a")
+                        elif(upload == 1):
+                            upload = 0
+                            data = pickle.dumps("upload:" + str(upload_num))
+                        else:
+                            data = pickle.dumps("200")
+                        self.s.send(data)
+                        self.conn = 1
+                        self.status = "Connected"
+                        self.code = 200
+                    elif((re.search("^content:*", str(msg)) != None)):
+                        global data_from_server
+                        x, data_from_server = msg.split(":")
                         data = pickle.dumps("200")
                         self.s.send(data)
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
+
                 except Exception as e:
                     ''' if anything goes wrong from server side then reset
                     the connection by setting conn to 0 and tries
@@ -118,25 +140,30 @@ def close_window():
 
 def enter_data():
     ''' take the name ofclient using the textbox '''
-    nts = name.get()
-    if(nts != ""):
-        t.name_client = nts
-    else:
-        t.name_client = ""
+    number = simpledialog.askstring(
+        "Input", "Enter any decimal number ?", parent=root)
+
+    if(number):
+        number = float(number)
+    global upload, upload_num
+    upload_num = number
+    upload = 1
+
+
+def download_request():
+    ''' take the name ofclient using the textbox '''
+    global download
+    download = 1
 
 
 ''' set font size that is going to be used on GUI '''
 myFont = font.Font(size=20)
 myFont1 = font.Font(size=40)
-''' empty label to have some space between the components on GUI '''
+''' dislay the name of client on GUI '''
 Label(root).pack()
-Label(root).pack()
-''' label to display the warning regarding to name of clients '''
-warning = Label(root)
-warning['font'] = myFont
-warning.pack()
-''' empty label to have some space between the components on GUI '''
-Label(root).pack()
+cname = Label(root, text="")
+cname['font'] = myFont
+cname.pack()
 Label(root).pack()
 ''' button to close the client connection to server '''
 btn = Button(root, text="Close connection", command=close_window)
@@ -147,70 +174,62 @@ en = Entry(root, textvariable=name)
 en['font'] = myFont
 ''' set the window size to 600x600 '''
 root.geometry("600x800")
-submit = Button(root, text="Connect", command=enter_data)
-submit['font'] = myFont
-''' empty label to have some space between the components on GUI '''
 Label(root).pack()
 Label(root).pack()
-''' dislay the name of client on GUI '''
-cname = Label(root, text="")
-cname['font'] = myFont
-cname.pack()
+upload = Button(root, text="Upload message", command=enter_data)
+upload['font'] = myFont
+upload.pack()
+Label(root).pack()
+Label(root).pack()
+Download = Button(root, text="Download message", command=download_request)
+Download['font'] = myFont
+Download.pack()
 ''' empty label to have some space between the components on GUI '''
+Label(root).pack()
+message = Label(root)
+message['font'] = myFont
+message.pack()
+
+''' empty label to have some space between the components on GUI '''
+Label(root).pack()
 Label(root).pack()
 ''' label to display the reverse counter on GUI '''
 lab = Label(root)
 lab['font'] = myFont1
 ''' empty label to have some space between the components on GUI '''
 Label(root).pack()
-Label(root).pack()
 lab.pack()
-Label(root).pack()
-''' empty label to have some space between the components on GUI '''
-Label(root).pack()
 Label(root).pack()
 ''' label to display the server status and display some special '''
 status = Label(root)
 status['font'] = myFont
 status.pack()
-''' empty label to have some space between the components on GUI '''
-Label(root).pack()
-Label(root).pack()
 ''' call this update function every 50 ms so it will update
 the information on GUI '''
 
 
 def update():
+    message.config(text=data_from_server)
     if(t.code == 404):
         ''' if we got code 404 from server then just display
     the message as Server is full try again after some time '''
         cname.config(text=t.name_client)
         status.config(text="Server is full")
-        en.pack_forget()
-        submit.pack_forget()
     elif(t.code == 201):
         ''' if we got code 201 from server then just display
     the message as Server is online '''
         cname.config(text=t.name_client)
         status.config(text="Server is online")
-        en.pack()
-        submit.pack()
     elif(t.code == 200):
         ''' if we got code 200 from server then everything
     is normal with server no special instruction '''
         cname.config(text=t.name_client)
-        warning.config(text="")
         status.config(text="Server is online")
-        en.pack_forget()
-        submit.pack_forget()
     elif(t.code == 403):
         ''' if we got code 403 from server then client j
     ust lost a connection a with server '''
         cname.config(text=t.name_client)
-        warning.config(text="")
         status.config(text="Server is not available at the moment")
-        en.pack_forget()
-        submit.pack_forget()
     ''' call update function after every 50 ms '''
     root.after(50, update)
 

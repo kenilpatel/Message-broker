@@ -1,0 +1,25 @@
+{
+  "a":{
+      "Meter":1,
+      "Millimeter":1000,
+      "Centimeter":100,
+      "Kilometer":0.001,
+      "Astronomical Unit":0.1496
+
+    },
+    "b":{
+      "Parsec":0.3247,
+      "Light Year":39.37,
+      "Inch":39.37,
+      "Foot":3.28084,
+      "Yard":1.09361
+    },
+    "c":{
+      "Mile":0.000621371,
+      "Nautical Mile":0.000539957,
+      "American football field":0.009111,
+      "Hand":9.84252,
+      "Horse":157
+
+    }
+}

@@ -89,13 +89,8 @@ class myThread(threading.Thread):
                     client to send its name to server '''
                     if(self.msg == 100):
                         signal_disconnected = ""
-                        self.msg = "201" + ":" +str(count)
+                        self.msg = "201" + ":" + str(count)
                         count = count + 1
-                    else:
-                        ''' if everything is fine then send msg 200
-                        which represent normal communication with
-                        client without any special instruction '''
-                        self.msg = 200
                     ''' send the signal to client '''
                     data = pickle.dumps(self.msg)
                     self.c.send(data)
@@ -107,10 +102,18 @@ class myThread(threading.Thread):
                         ''' send msg 200 which means normal message
                         no special instruction '''
                         self.msg = 200
+                    elif(re.search("^download:*", str(rdata)) != None):
+                        self.msg = "content:here is the download content" + \
+                            str(randint(0, 100))
+                    elif(re.search("^upload:*", str(rdata)) != None):
+                        x, number = rdata.split(":")
+                        self.msg = "content:here is the upload content" + \
+                            str(number)
+                    else:
+                        self.msg = 200
                 except Exception as e:
                     ''' if exception occurs then disconnects the
                     clients '''
-                    print(e)
                     err = 1
                     if(self.n != ""):
                         ''' remove the client from the list of clients
@@ -143,15 +146,8 @@ btn = Button(root, text="Close server", command=close_window)
 btn['font'] = myFont
 btn.pack()
 ''' set up the screen size to 600x600 '''
-root.geometry("600x600")
+root.geometry("600x800")
 ''' create empty label to have some space between component '''
-Label(root).pack()
-''' create empy label to have some space between component '''
-Label(root).pack()
-''' create empty label to have some space between component '''
-Label(root).pack()
-''' create empty label to have some space between component '''
-Label(root).pack()
 Label(root).pack()
 ''' normal label to display message on GUI '''
 head = Label(root, text="Currently connected client")
@@ -173,9 +169,6 @@ Label(root).pack()
 dstatus = Label(root)
 dstatus['font'] = myFont
 dstatus.pack()
-''' create empty label to have some space between component '''
-Label(root).pack()
-Label(root).pack()
 ''' call this update function every 50 ms so it will update the
 information on GUI '''
 
