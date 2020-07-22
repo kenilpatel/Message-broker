@@ -103,17 +103,19 @@ class myThread(threading.Thread):
                         no special instruction '''
                         self.msg = 200
                     elif(re.search("^download:*", str(rdata)) != None):
-                        self.msg = "content:here is the download content" + \
+                        self.msg = "download:here is the download content" + \
                             str(randint(0, 100))
                     elif(re.search("^upload:*", str(rdata)) != None):
-                        x, number = rdata.split(":")
-                        self.msg = "content:here is the upload content" + \
-                            str(number)
+                        print(rdata)
+                        x, number, queue = rdata.split(":")
+                        self.msg = "upload to server is successfully done for " + \
+                            str(number) + " to queue " + str(queue)
                     else:
                         self.msg = 200
                 except Exception as e:
                     ''' if exception occurs then disconnects the
                     clients '''
+                    print(e)
                     err = 1
                     if(self.n != ""):
                         ''' remove the client from the list of clients
@@ -137,7 +139,7 @@ def close_window():
 
 
 ''' setting up the font size '''
-myFont = font.Font(size=20)
+myFont = font.Font(size=15)
 myFont1 = font.Font(size=40)
 ''' create empty label to have some space between component '''
 Label(root).pack()
