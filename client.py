@@ -102,7 +102,7 @@ class myThread(threading.Thread):
                         global download, upload
                         if(download == 1):
                             download = 0
-                            data = pickle.dumps("download:a")
+                            data = pickle.dumps("download:A")
                         elif(upload == 1):
                             upload = 0
                             data = pickle.dumps("upload:" + str(upload_num) + ":" + str(queue))
@@ -192,6 +192,7 @@ def call_c():
 def enter_data():
     ''' take the name ofclient using the textbox '''
     global data_frame
+    number.set("")
     data_frame = Toplevel()
     fnt = font.Font(size=15)
     Label(data_frame).pack()

@@ -11,6 +11,7 @@ import time
 from tkinter import *
 from tkinter import font
 import os
+import json
 ''' maintain the list of clients id that are connected currently '''
 clients = []
 ''' maintain the list of clients name that are connected currently '''
@@ -22,6 +23,9 @@ from the client '''
 signal = ""
 signal_disconnected = ""
 count = 1
+upload_message = "No upload request"
+download_message = "No download request"
+conversion_dict = {}
 ''' this thread handle the incoming connection to the client '''
 
 
@@ -81,7 +85,7 @@ class myThread(threading.Thread):
             data = pickle.dumps(self.msg)
             self.c.send(data)
         else:
-            global count
+            global count, upload_message, download_message
             while (True):
                 try:
                     ''' if server is communicating to client for the
@@ -105,11 +109,20 @@ class myThread(threading.Thread):
                     elif(re.search("^download:*", str(rdata)) != None):
                         self.msg = "download:here is the download content" + \
                             str(randint(0, 100))
+                        x, queue = rdata.split(":")
+                        download_message = self.n + " polled for queue " + queue
                     elif(re.search("^upload:*", str(rdata)) != None):
                         print(rdata)
                         x, number, queue = rdata.split(":")
                         self.msg = "upload to server is successfully done for " + \
                             str(number) + " to queue " + str(queue)
+                        display_str = ""
+                        for x in conversion_dict[queue]:
+                            display_str = display_str + x + " : " + \
+                                str(float(number) *
+                                    conversion_dict[queue][x]) + "\n\n"
+                        upload_message = "message to be pushed on queue " + queue + "\n\n\n\n" + display_str
+
                     else:
                         self.msg = 200
                 except Exception as e:
@@ -139,6 +152,9 @@ def close_window():
 
 
 ''' setting up the font size '''
+f = open("conversion.txt")
+string_data = f.read()
+conversion_dict = json.loads(string_data)
 myFont = font.Font(size=15)
 myFont1 = font.Font(size=40)
 ''' create empty label to have some space between component '''
@@ -157,20 +173,39 @@ head['font'] = myFont
 head.pack()
 ''' create empty label to have some space between component '''
 Label(root).pack()
-''' create empty label to have some space between component '''
-Label(root).pack()
 ''' label to display name of currently connected clients '''
 cstatus = Label(root)
 cstatus['font'] = myFont
 cstatus.pack()
 ''' create empty label to have some space between component '''
-Label(root).pack()
-''' create empty label to have some space between component '''
-Label(root).pack()
 ''' label to display name of client who just got disconnected '''
 dstatus = Label(root)
 dstatus['font'] = myFont
 dstatus.pack()
+Label(root, text="-----------------------------------------------------------------------").pack()
+Label(root).pack()
+''' label to display name of currently connected clients '''
+dr_label = Label(root, text="Download request")
+dr_label['font'] = myFont
+dr_label.pack()
+Label(root).pack()
+download_status = Label(root)
+download_status['font'] = myFont
+download_status.pack()
+Label(root).pack()
+Label(root, text="-----------------------------------------------------------------------").pack()
+''' create empty label to have some space between component '''
+Label(root).pack()
+ur_label = Label(root, text="Upload request")
+ur_label['font'] = myFont
+ur_label.pack()
+Label(root).pack()
+''' label to display name of currently connected clients '''
+ustatus = Label(root)
+ustatus['font'] = myFont
+ustatus.pack()
+''' create empty label to have some space between component '''
+Label(root).pack()
 ''' call this update function every 50 ms so it will update the
 information on GUI '''
 
@@ -179,6 +214,9 @@ def update():
     c = ""
     ''' if there is no client conected then print no one is
     connected '''
+    global upload_message, download_message
+    ustatus.config(text=upload_message)
+    download_status.config(text=download_message)
     if(len(name) == 0):
         c = "No one is connected"
     else:
