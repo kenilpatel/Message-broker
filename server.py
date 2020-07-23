@@ -121,7 +121,8 @@ class myThread(threading.Thread):
                             display_str = display_str + x + " : " + \
                                 str(float(number) *
                                     conversion_dict[queue][x]) + "\n\n"
-                        upload_message = "message to be pushed on queue " + queue + "\n\n\n\n" + display_str
+                        upload_message = "message to be pushed on queue " + \
+                            queue + "\n\n\n\n" + display_str
 
                     else:
                         self.msg = 200
@@ -155,7 +156,7 @@ def close_window():
 f = open("conversion.txt")
 string_data = f.read()
 conversion_dict = json.loads(string_data)
-myFont = font.Font(size=15)
+myFont = font.Font(size=12)
 myFont1 = font.Font(size=40)
 ''' create empty label to have some space between component '''
 Label(root).pack()

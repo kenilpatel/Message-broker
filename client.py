@@ -23,7 +23,8 @@ download = 0
 upload = 0
 upload_num = 0
 queue = ""
-data_from_server = ""
+data_from_server = "Downloded content will get displayed here"
+upload_msg = "Uploading feedback from server will get displayed here"
 warning_msg = ""
 data_frame = None
 number = StringVar()
@@ -74,12 +75,10 @@ class myThread(threading.Thread):
             else:
                 try:
                     ''' receving message from server '''
-                    global data_from_server, upload_num, queue, warning_msg
+                    global data_from_server, upload_num, queue, warning_msg, upload_msg
                     msg = pickle.loads(self.s.recv(1024))
                     ''' if message is 404 then server is currently connected
                      to 3 clients '''
-                    if(re.search("^upload*", str(msg))!=None):
-                        print("upload")
                     if(msg == 404):
                         self.status = "server is full please"
                         self.conn = 0
@@ -102,10 +101,11 @@ class myThread(threading.Thread):
                         global download, upload
                         if(download == 1):
                             download = 0
-                            data = pickle.dumps("download:A")
+                            data = pickle.dumps("download:" + queue)
                         elif(upload == 1):
                             upload = 0
-                            data = pickle.dumps("upload:" + str(upload_num) + ":" + str(queue))
+                            data = pickle.dumps(
+                                "upload:" + str(upload_num) + ":" + str(queue))
                         else:
                             data = pickle.dumps("200")
                         self.s.send(data)
@@ -119,8 +119,8 @@ class myThread(threading.Thread):
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
-                    elif(re.search("^upload*", str(msg))!=None):
-                        warning_msg = msg
+                    elif(re.search("^upload*", str(msg)) != None):
+                        upload_msg = msg
                         data = pickle.dumps("200")
                         self.s.send(data)
                         self.conn = 1
@@ -153,12 +153,12 @@ def close_window():
 
 
 def call_a():
-    global queue, warning_msg, upload, upload_num
+    global queue, upload_msg, upload, upload_num
     try:
         upload_num = float(number.get())
         queue = "A"
         upload = 1
-        warning_msg = "Uploading " + str(upload_num) + " to A"
+        upload_msg = "Uploading " + str(upload_num) + " to A"
     except Exception as e:
         print(e, number.get())
         warning_msg = "Please enter proper number"
@@ -166,26 +166,47 @@ def call_a():
 
 
 def call_b():
-    global queue, warning_msg, upload, upload_num
+    global queue, upload_msg, upload, upload_num
     try:
         upload_num = float(number.get())
         queue = "B"
         upload = 1
-        warning_msg = "Uploading " + str(upload_num) + " to B"
+        upload_msg = "Uploading " + str(upload_num) + " to B"
     except Exception as e:
         warning_msg = "Please enter proper number"
     data_frame.destroy()
 
 
 def call_c():
-    global queue, warning_msg, upload, upload_num
+    global queue, upload_msg, upload, upload_num
     try:
         upload_num = float(number.get())
         queue = "C"
         upload = 1
-        warning_msg = "Uploading " + str(upload_num) + " to C"
+        upload_msg = "Uploading " + str(upload_num) + " to C"
     except Exception as e:
         warning_msg = "Please enter proper number"
+    data_frame.destroy()
+
+
+def call_a1():
+    global queue, download
+    download = 1
+    queue = "A"
+    data_frame.destroy()
+
+
+def call_b1():
+    global queue, download
+    download = 1
+    queue = "B"
+    data_frame.destroy()
+
+
+def call_c1():
+    global queue, download
+    download = 1
+    queue = "C"
     data_frame.destroy()
 
 
@@ -196,7 +217,7 @@ def enter_data():
     data_frame = Toplevel()
     fnt = font.Font(size=15)
     Label(data_frame).pack()
-    label = Label(data_frame, text="Enter any number")
+    label = Label(data_frame, text=t.name_client + " please enter any number")
     label['font'] = fnt
     label.pack()
     Label(data_frame).pack()
@@ -226,15 +247,37 @@ def enter_data():
 def download_request():
     ''' take the name ofclient using the textbox '''
     global download
-    download = 1
+    global data_frame
+    fnt = font.Font(size=15)
+    number.set("")
+    data_frame = Toplevel()
+    data_frame.geometry("400x300")
+    Label(data_frame).pack()
+    label = Label(data_frame, text=t.name_client + " please select Queue")
+    label['font'] = fnt
+    label.pack()
+    Label(data_frame).pack()
+    Label(data_frame).pack()
+    A = Button(data_frame, text="A", width=20, command=call_a1)
+    A['font'] = fnt
+    B = Button(data_frame, text="B", width=20, command=call_b1)
+    B['font'] = fnt
+    C = Button(data_frame, text="C", width=20, command=call_c1)
+    C['font'] = fnt
+    A.pack()
+    Label(data_frame).pack()
+    B.pack()
+    Label(data_frame).pack()
+    C.pack()
+    data_frame.mainloop()
 
 
 ''' set font size that is going to be used on GUI '''
-myFont = font.Font(size=15)
+myFont = font.Font(size=12)
 myFont1 = font.Font(size=20)
 ''' dislay the name of client on GUI '''
 Label(root).pack()
-cname = Label(root, text="")
+cname = Label(root, text="client name :- not connected")
 cname['font'] = myFont
 cname.pack()
 Label(root).pack()
@@ -248,21 +291,13 @@ en['font'] = myFont
 ''' set the window size to 600x600 '''
 root.geometry("600x800")
 Label(root).pack()
-Label(root).pack()
 upload = Button(root, text="Upload message", command=enter_data)
 upload['font'] = myFont
 upload.pack()
 Label(root).pack()
-Label(root).pack()
-Download = Button(root, text="Download message", command=download_request)
-Download['font'] = myFont
-Download.pack()
-''' empty label to have some space between the components on GUI '''
-Label(root).pack()
-message = Label(root)
-message['font'] = myFont
-message.pack()
-
+upload = Button(root, text="Downloded message", command=download_request)
+upload['font'] = myFont
+upload.pack()
 ''' empty label to have some space between the components on GUI '''
 Label(root).pack()
 warning = Label(root, text="")
@@ -272,43 +307,57 @@ Label(root).pack()
 ''' label to display the reverse counter on GUI '''
 lab = Label(root)
 lab['font'] = myFont1
-''' empty label to have some space between the components on GUI '''
-Label(root).pack()
-lab.pack()
-Label(root).pack()
 ''' label to display the server status and display some special '''
 status = Label(root)
 status['font'] = myFont
 status.pack()
 ''' call this update function every 50 ms so it will update
 the information on GUI '''
+Label(root).pack()
+Label(root, text="-----------------------------------------------------------------------").pack()
+Label(root).pack()
+Label(root).pack()
+message1 = Label(root, text="")
+message1['font'] = myFont
+message1.pack()
+Label(root).pack()
+Label(root).pack()
+Label(root, text="-----------------------------------------------------------------------").pack()
+Label(root).pack()
+Label(root).pack()
+message = Label(root, text="")
+message['font'] = myFont
+message.pack()
 
+''' empty label to have some space between the components on GUI '''
+Label(root).pack()
 
 def update():
     message.config(text=data_from_server)
+    message1.config(text=upload_msg)
     if(t.code == 404):
         ''' if we got code 404 from server then just display
     the message as Server is full try again after some time '''
         warning.config(text=warning_msg)
-        cname.config(text=t.name_client)
+        cname.config(text="client name :- not connected")
         status.config(text="Server is full")
     elif(t.code == 201):
         ''' if we got code 201 from server then just display
     the message as Server is online '''
         warning.config(text=warning_msg)
-        cname.config(text=t.name_client)
+        cname.config(text="client name :- "+t.name_client)
         status.config(text="Server is online")
     elif(t.code == 200):
         ''' if we got code 200 from server then everything
     is normal with server no special instruction '''
         warning.config(text=warning_msg)
-        cname.config(text=t.name_client)
+        cname.config(text="client name :- "+t.name_client)
         status.config(text="Server is online")
     elif(t.code == 403):
         ''' if we got code 403 from server then client j
     ust lost a connection a with server '''
         warning.config(text=warning_msg)
-        cname.config(text=t.name_client)
+        cname.config(text="client name :- not connected")
         status.config(text="Server is not available at the moment")
     ''' call update function after every 50 ms '''
     root.after(50, update)
