@@ -26,6 +26,7 @@ count = 1
 upload_message = "No upload request"
 download_message = "No download request"
 conversion_dict = {}
+empty_dict = "{\"A\":{\"data\":[]},\"B\":{\"data\":[]},\"C\":{\"data\":[]}}"
 ''' this thread handle the incoming connection to the client '''
 
 
@@ -107,12 +108,26 @@ class myThread(threading.Thread):
                         no special instruction '''
                         self.msg = 200
                     elif(re.search("^download:*", str(rdata)) != None):
-                        self.msg = "download:here is the download content" + \
-                            str(randint(0, 100))
+                        fr = open("queue.txt", "r")
+                        data = fr.read()
+                        queue_data = json.loads(data)
+                        fr.close()
                         x, queue = rdata.split(":")
-                        download_message = self.n + " polled for queue " + queue
+                        if(len(queue_data[queue]["data"])!=0):
+                            self.msg = "download-" + \
+                                "\n".join(queue_data[queue]["data"])
+                            download_message = self.n + " polled for queue " + queue
+                        else:
+                            self.msg = "download-"+"No content"
+                        queue_data[queue]["data"] = []
+                        fr = open("queue.txt", "w")
+                        fr.write(json.dumps(queue_data))
+                        fr.close()
                     elif(re.search("^upload:*", str(rdata)) != None):
-                        print(rdata)
+                        fr = open("queue.txt", "r")
+                        data = fr.read()
+                        queue_data = json.loads(data)
+                        fr.close()
                         x, number, queue = rdata.split(":")
                         self.msg = "upload to server is successfully done for " + \
                             str(number) + " to queue " + str(queue)
@@ -121,6 +136,10 @@ class myThread(threading.Thread):
                             display_str = display_str + x + " : " + \
                                 str(float(number) *
                                     conversion_dict[queue][x]) + "\n\n"
+                        queue_data[queue]["data"].append(display_str)
+                        fr = open("queue.txt", "w")
+                        fr.write(json.dumps(queue_data))
+                        fr.close()
                         upload_message = "message to be pushed on queue " + \
                             queue + "\n\n\n\n" + display_str
 
@@ -165,7 +184,7 @@ btn = Button(root, text="Close server", command=close_window)
 btn['font'] = myFont
 btn.pack()
 ''' set up the screen size to 600x600 '''
-root.geometry("600x800")
+root.geometry("600x900")
 ''' create empty label to have some space between component '''
 Label(root).pack()
 ''' normal label to display message on GUI '''
@@ -180,6 +199,8 @@ cstatus['font'] = myFont
 cstatus.pack()
 ''' create empty label to have some space between component '''
 ''' label to display name of client who just got disconnected '''
+Label(root).pack()
+Label(root).pack()
 dstatus = Label(root)
 dstatus['font'] = myFont
 dstatus.pack()

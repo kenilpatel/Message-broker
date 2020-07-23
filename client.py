@@ -28,6 +28,7 @@ upload_msg = "Uploading feedback from server will get displayed here"
 warning_msg = ""
 data_frame = None
 number = StringVar()
+mylist = None
 
 
 class myThread(threading.Thread):
@@ -112,8 +113,14 @@ class myThread(threading.Thread):
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
-                    elif((re.search("^download:*", str(msg)) != None)):
-                        x, data_from_server = msg.split(":")
+                    elif((re.search("^download-*", str(msg)) != None)):
+                        print(msg)
+                        x, data_from_server = msg.split("-")
+                        list_item = data_from_server.split("\n")
+                        global mylist
+                        mylist.delete(0, END)
+                        for line in list_item:
+                            mylist.insert(END, line)
                         data = pickle.dumps("200")
                         self.s.send(data)
                         self.conn = 1
@@ -325,15 +332,20 @@ Label(root).pack()
 Label(root, text="-----------------------------------------------------------------------").pack()
 Label(root).pack()
 Label(root).pack()
-message = Label(root, text="")
+message = Label(root, text="Downloaded content")
 message['font'] = myFont
 message.pack()
-
+Label(root).pack()
+scrollbar = Scrollbar(root)
+scrollbar.pack(side=RIGHT, fill=Y)
+mylist = Listbox(root, yscrollcommand=scrollbar.set)
+mylist.pack(fill=BOTH)
+scrollbar.config(command=mylist.yview)
 ''' empty label to have some space between the components on GUI '''
 Label(root).pack()
 
+
 def update():
-    message.config(text=data_from_server)
     message1.config(text=upload_msg)
     if(t.code == 404):
         ''' if we got code 404 from server then just display
@@ -345,13 +357,13 @@ def update():
         ''' if we got code 201 from server then just display
     the message as Server is online '''
         warning.config(text=warning_msg)
-        cname.config(text="client name :- "+t.name_client)
+        cname.config(text="client name :- " + t.name_client)
         status.config(text="Server is online")
     elif(t.code == 200):
         ''' if we got code 200 from server then everything
     is normal with server no special instruction '''
         warning.config(text=warning_msg)
-        cname.config(text="client name :- "+t.name_client)
+        cname.config(text="client name :- " + t.name_client)
         status.config(text="Server is online")
     elif(t.code == 403):
         ''' if we got code 403 from server then client j
