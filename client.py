@@ -168,7 +168,7 @@ def call_a():
         upload_msg = "Uploading " + str(upload_num) + " to A"
     except Exception as e:
         print(e, number.get())
-        warning_msg = "Please enter proper number"
+        upload_msg = "Please enter proper number"
     data_frame.destroy()
 
 
@@ -180,7 +180,7 @@ def call_b():
         upload = 1
         upload_msg = "Uploading " + str(upload_num) + " to B"
     except Exception as e:
-        warning_msg = "Please enter proper number"
+        upload_msg = "Please enter proper number"
     data_frame.destroy()
 
 
@@ -192,7 +192,7 @@ def call_c():
         upload = 1
         upload_msg = "Uploading " + str(upload_num) + " to C"
     except Exception as e:
-        warning_msg = "Please enter proper number"
+        upload_msg = "Please enter proper number"
     data_frame.destroy()
 
 
@@ -298,13 +298,12 @@ en['font'] = myFont
 ''' set the window size to 600x600 '''
 root.geometry("600x800")
 Label(root).pack()
-upload = Button(root, text="Upload message", command=enter_data)
-upload['font'] = myFont
-upload.pack()
+uploadb = Button(root, text="Upload message", command=enter_data)
+uploadb['font'] = myFont
+
 Label(root).pack()
-upload = Button(root, text="Downloded message", command=download_request)
-upload['font'] = myFont
-upload.pack()
+downloadb = Button(root, text="Downlod message", command=download_request)
+downloadb['font'] = myFont
 ''' empty label to have some space between the components on GUI '''
 Label(root).pack()
 warning = Label(root, text="")
@@ -353,24 +352,34 @@ def update():
         warning.config(text=warning_msg)
         cname.config(text="client name :- not connected")
         status.config(text="Server is full")
+        uploadb.pack_forget()
+        downloadb.pack_forget()
     elif(t.code == 201):
         ''' if we got code 201 from server then just display
     the message as Server is online '''
         warning.config(text=warning_msg)
         cname.config(text="client name :- " + t.name_client)
         status.config(text="Server is online")
+        uploadb.pack()
+        Label(root).pack()
+        downloadb.pack()
     elif(t.code == 200):
         ''' if we got code 200 from server then everything
     is normal with server no special instruction '''
         warning.config(text=warning_msg)
         cname.config(text="client name :- " + t.name_client)
         status.config(text="Server is online")
+        uploadb.pack()
+        Label(root).pack()
+        downloadb.pack()
     elif(t.code == 403):
         ''' if we got code 403 from server then client j
     ust lost a connection a with server '''
         warning.config(text=warning_msg)
         cname.config(text="client name :- not connected")
         status.config(text="Server is not available at the moment")
+        uploadb.pack_forget()
+        downloadb.pack_forget()
     ''' call update function after every 50 ms '''
     root.after(50, update)
 

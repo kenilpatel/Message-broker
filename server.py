@@ -12,6 +12,7 @@ from tkinter import *
 from tkinter import font
 import os
 import json
+from json.decoder import JSONDecodeError
 ''' maintain the list of clients id that are connected currently '''
 clients = []
 ''' maintain the list of clients name that are connected currently '''
@@ -110,7 +111,10 @@ class myThread(threading.Thread):
                     elif(re.search("^download:*", str(rdata)) != None):
                         fr = open("queue.txt", "r")
                         data = fr.read()
-                        queue_data = json.loads(data)
+                        try:
+                            queue_data = json.loads(data)
+                        except JSONDecodeError:
+                            queue_data = json.loads(empty_dict)
                         fr.close()
                         x, queue = rdata.split(":")
                         if(len(queue_data[queue]["data"])!=0):
@@ -126,7 +130,10 @@ class myThread(threading.Thread):
                     elif(re.search("^upload:*", str(rdata)) != None):
                         fr = open("queue.txt", "r")
                         data = fr.read()
-                        queue_data = json.loads(data)
+                        try:
+                            queue_data = json.loads(data)
+                        except JSONDecodeError:
+                            queue_data = json.loads(empty_dict)
                         fr.close()
                         x, number, queue = rdata.split(":")
                         self.msg = "upload to server is successfully done for " + \
@@ -172,6 +179,7 @@ def close_window():
 
 
 ''' setting up the font size '''
+
 f = open("conversion.txt")
 string_data = f.read()
 conversion_dict = json.loads(string_data)
