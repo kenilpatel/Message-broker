@@ -107,19 +107,18 @@ class myThread(threading.Thread):
                         if(download == 1):
                             download = 0
                             data = pickle.dumps("download:" + queue)
-                        ''' upload a length to server '''
                         elif(upload == 1):
                             upload = 0
                             data = pickle.dumps(
                                 "upload:" + str(upload_num) + ":" + str(queue))
-                        ''' if nothing special then just send 200 to server '''
+                        # if nothing special then just send 200 to server
                         else:
                             data = pickle.dumps("200")
                         self.s.send(data)
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
-                    ''' if server send the message starting from download then display the download message to GUI '''
+                    # if server send the message starting from download then display the download message to GUI
                     elif((re.search("^download-*", str(msg)) != None)):
                         x, data_from_server = msg.split("-")
                         ''' create a list of data items received'''
@@ -134,7 +133,7 @@ class myThread(threading.Thread):
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
-                    ''' if server send the message starting from upload then display the upload feedback to GUI  '''
+                     # if server send the message starting from upload then display the upload feedback to GUI
                     elif(re.search("^upload*", str(msg)) != None):
                         upload_msg = msg
                         data = pickle.dumps("200")
@@ -171,7 +170,7 @@ def close_window():
 def call_a():
     global queue, upload_msg, upload, upload_num
     try:
-    	''' check weather the number is in proper format or not '''
+    	# check weather the number is in proper format or not
         upload_num = float(number.get())
         ''' set queue '''
         queue = "A"
@@ -179,17 +178,18 @@ def call_a():
         ''' display uploading message to GUI '''
         upload_msg = "Uploading " + str(upload_num) + " to A"
     except Exception as e:
-    	''' set warning to enter proper length '''
+    	# set warning to enter proper length
         upload_msg = "Please enter proper length"
     data_frame.destroy()
 
 
 ''' function to take length as input for queue B '''
 
+
 def call_b():
     global queue, upload_msg, upload, upload_num
     try:
-    	''' check weather the number is in proper format or not '''
+    	# check weather the number is in proper format or not
         upload_num = float(number.get())
         ''' set queue '''
         queue = "B"
@@ -197,17 +197,18 @@ def call_b():
         ''' display uploading message to GUI '''
         upload_msg = "Uploading " + str(upload_num) + " to B"
     except Exception as e:
-    	''' set warning to enter proper length '''
+    	# set warning to enter proper length
         upload_msg = "Please enter proper length"
     data_frame.destroy()
 
 
 ''' function to take length as input for queue C '''
 
+
 def call_c():
     global queue, upload_msg, upload, upload_num
     try:
-    	''' check weather the number is in proper format or not '''
+    	# check weather the number is in proper format or not
         upload_num = float(number.get())
         ''' set queue '''
         queue = "C"
@@ -215,17 +216,20 @@ def call_c():
         ''' display uploading message to GUI '''
         upload_msg = "Uploading " + str(upload_num) + " to C"
     except Exception as e:
-    	''' set warning to enter proper length '''
+    	# set warning to enter proper length
         upload_msg = "Please enter proper length"
     data_frame.destroy()
 
+
 ''' function to download from queue A '''
+
 
 def call_a1():
     global queue, download
     download = 1
     queue = "A"
     data_frame.destroy()
+
 
 ''' function to download from queue B '''
 
@@ -251,7 +255,7 @@ def call_c1():
 
 
 def enter_data():
-	''' create a data frame '''
+	# create a data frame
     global data_frame
     number.set("")
     data_frame = Toplevel()

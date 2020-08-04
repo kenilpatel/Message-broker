@@ -113,7 +113,7 @@ class myThread(threading.Thread):
                         no special instruction '''
                         self.msg = 200
 
-                    ''' if server recives message starting from download then read the queue and send it to the client '''
+                    # if server recives message starting from download then read the queue and send it to the client
                     elif(re.search("^download:*", str(rdata)) != None):
                         ''' read the queue data from file in case of server failure '''
                         fr = open("queue.txt", "r")
@@ -132,7 +132,7 @@ class myThread(threading.Thread):
                             self.msg = "download-" + \
                                 "\n".join(queue_data[queue]["data"])
                             download_message = self.n + " polled for queue " + queue
-                        ''' if queue is empty then just send message as queue is empty '''
+                        # if queue is empty then just send message as queue is empty
                         else:
                             self.msg = "download-"+"Queue is empty"
                         ''' set the queue to empty if client read data from queue '''
@@ -141,7 +141,7 @@ class myThread(threading.Thread):
                         fr = open("queue.txt", "w")
                         fr.write(json.dumps(queue_data))
                         fr.close()
-                    ''' if server recives message starting from upload then write to the queue '''
+                    # if server recives message starting from upload then write to the queue
                     elif(re.search("^upload:*", str(rdata)) != None):
                         ''' open the queue from file '''
                         fr = open("queue.txt", "r")
