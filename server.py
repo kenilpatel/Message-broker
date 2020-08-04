@@ -19,15 +19,19 @@ clients = []
 name = []
 ''' initialize the GUI '''
 root = Tk()
-''' both variables are used to represent the message received
-from the client '''
 signal = ""
 signal_disconnected = ""
 count = 1
+''' both variables are used to represent the request received
+from the client '''
 upload_message = "No upload request"
 download_message = "No download request"
+''' comparision dictionary for conversion at server side '''
 conversion_dict = {}
+''' initially have a empty dictionary '''
 empty_dict = "{\"A\":{\"data\":[]},\"B\":{\"data\":[]},\"C\":{\"data\":[]}}"
+
+
 ''' this thread handle the incoming connection to the client '''
 
 
@@ -108,45 +112,64 @@ class myThread(threading.Thread):
                         ''' send msg 200 which means normal message
                         no special instruction '''
                         self.msg = 200
+
+                    ''' if server recives message starting from download then read the queue and send it to the client '''
                     elif(re.search("^download:*", str(rdata)) != None):
+                        ''' read the queue data from file in case of server failure '''
                         fr = open("queue.txt", "r")
                         data = fr.read()
                         try:
+                            ''' if data from file is in a proper format then load dictionary '''
                             queue_data = json.loads(data)
                         except JSONDecodeError:
+                            ''' if data is not in a proper format then load empty dictionary '''
                             queue_data = json.loads(empty_dict)
                         fr.close()
+                        ''' read the content from queue and construct the message from client '''
                         x, queue = rdata.split(":")
+                        ''' if queue is not empty then read the queue '''
                         if(len(queue_data[queue]["data"])!=0):
                             self.msg = "download-" + \
                                 "\n".join(queue_data[queue]["data"])
                             download_message = self.n + " polled for queue " + queue
+                        ''' if queue is empty then just send message as queue is empty '''
                         else:
-                            self.msg = "download-"+"No content"
+                            self.msg = "download-"+"Queue is empty"
+                        ''' set the queue to empty if client read data from queue '''
                         queue_data[queue]["data"] = []
+                        ''' write the data to queue '''
                         fr = open("queue.txt", "w")
                         fr.write(json.dumps(queue_data))
                         fr.close()
+                    ''' if server recives message starting from upload then write to the queue '''
                     elif(re.search("^upload:*", str(rdata)) != None):
+                        ''' open the queue from file '''
                         fr = open("queue.txt", "r")
                         data = fr.read()
                         try:
+                            ''' if data from file is in a proper format then load dictionary '''
                             queue_data = json.loads(data)
                         except JSONDecodeError:
+                            ''' if data is not in a proper format then load empty dictionary '''
                             queue_data = json.loads(empty_dict)
                         fr.close()
                         x, number, queue = rdata.split(":")
+                        ''' send the upload confirmation message to client '''
                         self.msg = "upload to server is successfully done for " + \
                             str(number) + " to queue " + str(queue)
                         display_str = ""
+                        ''' perform conversion using conversion dictionary '''
                         for x in conversion_dict[queue]:
                             display_str = display_str + x + " : " + \
                                 str(float(number) *
                                     conversion_dict[queue][x]) + "\n\n"
+                        ''' add the data in queue '''
                         queue_data[queue]["data"].append(display_str)
+                        ''' write the data in the file in order to recover from queue '''
                         fr = open("queue.txt", "w")
                         fr.write(json.dumps(queue_data))
                         fr.close()
+                        ''' display the message to be pushed on queue on GUI '''
                         upload_message = "message to be pushed on queue " + \
                             queue + "\n\n\n\n" + display_str
 
@@ -180,7 +203,7 @@ def close_window():
 
 ''' setting up the font size '''
 
-f = open("conversion.txt")
+f = open("metrics.txt")
 string_data = f.read()
 conversion_dict = json.loads(string_data)
 myFont = font.Font(size=12)
@@ -214,11 +237,12 @@ dstatus['font'] = myFont
 dstatus.pack()
 Label(root, text="-----------------------------------------------------------------------").pack()
 Label(root).pack()
-''' label to display name of currently connected clients '''
+''' label to display download request from client '''
 dr_label = Label(root, text="Download request")
 dr_label['font'] = myFont
 dr_label.pack()
 Label(root).pack()
+''' label to display download status from client '''
 download_status = Label(root)
 download_status['font'] = myFont
 download_status.pack()
@@ -226,11 +250,12 @@ Label(root).pack()
 Label(root, text="-----------------------------------------------------------------------").pack()
 ''' create empty label to have some space between component '''
 Label(root).pack()
+''' label to display upload request from client '''
 ur_label = Label(root, text="Upload request")
 ur_label['font'] = myFont
 ur_label.pack()
 Label(root).pack()
-''' label to display name of currently connected clients '''
+''' label to display upload status from client '''
 ustatus = Label(root)
 ustatus['font'] = myFont
 ustatus.pack()

@@ -17,16 +17,20 @@ from tkinter import simpledialog
 root = Tk()
 ''' This vaiable stores the name of client and sends it to server'''
 name = StringVar()
-''' This is the main thread that is gonna handle the communication with the
- server '''
+''' this variable stores the information about download message request '''
 download = 0
+''' this variable stores the information about upload message request '''
 upload = 0
+''' this variable stores the number to upload '''
 upload_num = 0
+''' this variable stores the output queue from server '''
 queue = ""
 data_from_server = "Downloded content will get displayed here"
 upload_msg = "Uploading feedback from server will get displayed here"
+''' this variable stores the warning '''
 warning_msg = ""
 data_frame = None
+''' this takes input for length in meter '''
 number = StringVar()
 mylist = None
 
@@ -88,7 +92,6 @@ class myThread(threading.Thread):
                         ''' if message is 201 then server is requesting
                         the name from client '''
                         x, y = msg.split(":")
-
                         self.code = 201
                         self.status = "Server is online"
                         self.name_client = "client-" + str(y)
@@ -100,25 +103,30 @@ class myThread(threading.Thread):
                         ''' server is normally communicating with the client
                      no special instruction given by server '''
                         global download, upload
+                        ''' download from server '''
                         if(download == 1):
                             download = 0
                             data = pickle.dumps("download:" + queue)
+                        ''' upload a length to server '''
                         elif(upload == 1):
                             upload = 0
                             data = pickle.dumps(
                                 "upload:" + str(upload_num) + ":" + str(queue))
+                        ''' if nothing special then just send 200 to server '''
                         else:
                             data = pickle.dumps("200")
                         self.s.send(data)
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
+                    ''' if server send the message starting from download then display the download message to GUI '''
                     elif((re.search("^download-*", str(msg)) != None)):
-                        print(msg)
                         x, data_from_server = msg.split("-")
+                        ''' create a list of data items received'''
                         list_item = data_from_server.split("\n")
                         global mylist
                         mylist.delete(0, END)
+                        ''' add items in list '''
                         for line in list_item:
                             mylist.insert(END, line)
                         data = pickle.dumps("200")
@@ -126,6 +134,7 @@ class myThread(threading.Thread):
                         self.conn = 1
                         self.status = "Connected"
                         self.code = 200
+                    ''' if server send the message starting from upload then display the upload feedback to GUI  '''
                     elif(re.search("^upload*", str(msg)) != None):
                         upload_msg = msg
                         data = pickle.dumps("200")
@@ -156,51 +165,69 @@ def close_window():
     os._exit(0)
 
 
-''' function to take name of client as input '''
+''' function to take length as input for queue A '''
 
 
 def call_a():
     global queue, upload_msg, upload, upload_num
     try:
+    	''' check weather the number is in proper format or not '''
         upload_num = float(number.get())
+        ''' set queue '''
         queue = "A"
         upload = 1
+        ''' display uploading message to GUI '''
         upload_msg = "Uploading " + str(upload_num) + " to A"
     except Exception as e:
-        print(e, number.get())
-        upload_msg = "Please enter proper number"
+    	''' set warning to enter proper length '''
+        upload_msg = "Please enter proper length"
     data_frame.destroy()
 
+
+''' function to take length as input for queue B '''
 
 def call_b():
     global queue, upload_msg, upload, upload_num
     try:
+    	''' check weather the number is in proper format or not '''
         upload_num = float(number.get())
+        ''' set queue '''
         queue = "B"
         upload = 1
+        ''' display uploading message to GUI '''
         upload_msg = "Uploading " + str(upload_num) + " to B"
     except Exception as e:
-        upload_msg = "Please enter proper number"
+    	''' set warning to enter proper length '''
+        upload_msg = "Please enter proper length"
     data_frame.destroy()
 
+
+''' function to take length as input for queue C '''
 
 def call_c():
     global queue, upload_msg, upload, upload_num
     try:
+    	''' check weather the number is in proper format or not '''
         upload_num = float(number.get())
+        ''' set queue '''
         queue = "C"
         upload = 1
+        ''' display uploading message to GUI '''
         upload_msg = "Uploading " + str(upload_num) + " to C"
     except Exception as e:
-        upload_msg = "Please enter proper number"
+    	''' set warning to enter proper length '''
+        upload_msg = "Please enter proper length"
     data_frame.destroy()
 
+''' function to download from queue A '''
 
 def call_a1():
     global queue, download
     download = 1
     queue = "A"
     data_frame.destroy()
+
+''' function to download from queue B '''
 
 
 def call_b1():
@@ -210,6 +237,9 @@ def call_b1():
     data_frame.destroy()
 
 
+''' function to download from queue C '''
+
+
 def call_c1():
     global queue, download
     download = 1
@@ -217,30 +247,40 @@ def call_c1():
     data_frame.destroy()
 
 
+''' take length as input from user to upload to server '''
+
+
 def enter_data():
-    ''' take the name ofclient using the textbox '''
+	''' create a data frame '''
     global data_frame
     number.set("")
     data_frame = Toplevel()
     fnt = font.Font(size=15)
     Label(data_frame).pack()
-    label = Label(data_frame, text=t.name_client + " please enter any number")
+    ''' label to display enter length '''
+    label = Label(data_frame, text=t.name_client + " please enter length in meter")
     label['font'] = fnt
     label.pack()
     Label(data_frame).pack()
+    ''' create entry box to take length from user '''
     en = Entry(data_frame, textvariable=number)
     en['font'] = fnt
     en.pack()
+    ''' set size of data frame '''
     data_frame.geometry("400x400")
     Label(data_frame).pack()
+    ''' prompt user to select queue '''
     label = Label(data_frame, text="Select Queue")
     label['font'] = fnt
     label.pack()
     Label(data_frame).pack()
+    ''' create a button to select queue A '''
     A = Button(data_frame, text="A", width=20, command=call_a)
     A['font'] = fnt
+    ''' create a button to select queue B '''
     B = Button(data_frame, text="B", width=20, command=call_b)
     B['font'] = fnt
+    ''' create a button to select queue C '''
     C = Button(data_frame, text="C", width=20, command=call_c)
     C['font'] = fnt
     A.pack()
@@ -251,24 +291,31 @@ def enter_data():
     data_frame.mainloop()
 
 
+''' display the screen to download the content from queue '''
+
 def download_request():
-    ''' take the name ofclient using the textbox '''
     global download
+    ''' create a data frame '''
     global data_frame
     fnt = font.Font(size=15)
     number.set("")
     data_frame = Toplevel()
+    ''' set a size of window '''
     data_frame.geometry("400x300")
     Label(data_frame).pack()
+    ''' display the message to select queue '''
     label = Label(data_frame, text=t.name_client + " please select Queue")
     label['font'] = fnt
     label.pack()
     Label(data_frame).pack()
     Label(data_frame).pack()
+    ''' create a button to select queue A '''
     A = Button(data_frame, text="A", width=20, command=call_a1)
     A['font'] = fnt
+    ''' create a button to select queue B '''
     B = Button(data_frame, text="B", width=20, command=call_b1)
     B['font'] = fnt
+    ''' create a button to select queue C '''
     C = Button(data_frame, text="C", width=20, command=call_c1)
     C['font'] = fnt
     A.pack()
@@ -292,37 +339,35 @@ Label(root).pack()
 btn = Button(root, text="Close connection", command=close_window)
 btn['font'] = myFont
 btn.pack()
-''' entry box to get client name '''
-en = Entry(root, textvariable=name)
-en['font'] = myFont
 ''' set the window size to 600x600 '''
 root.geometry("600x800")
 Label(root).pack()
+''' button to upload message to server '''
 uploadb = Button(root, text="Upload message", command=enter_data)
 uploadb['font'] = myFont
-
-Label(root).pack()
-downloadb = Button(root, text="Downlod message", command=download_request)
+''' button to download message from server '''
+downloadb = Button(root, text="Check for message", command=download_request)
 downloadb['font'] = myFont
 ''' empty label to have some space between the components on GUI '''
 Label(root).pack()
+''' label to display warning message '''
 warning = Label(root, text="")
 warning['font'] = myFont
 warning.pack()
+''' empty label to have some space between the components on GUI '''
 Label(root).pack()
-''' label to display the reverse counter on GUI '''
 lab = Label(root)
 lab['font'] = myFont1
-''' label to display the server status and display some special '''
+''' label to display the server status '''
 status = Label(root)
 status['font'] = myFont
 status.pack()
-''' call this update function every 50 ms so it will update
-the information on GUI '''
+
 Label(root).pack()
 Label(root, text="-----------------------------------------------------------------------").pack()
 Label(root).pack()
 Label(root).pack()
+''' label to display the upload message status '''
 message1 = Label(root, text="")
 message1['font'] = myFont
 message1.pack()
@@ -331,10 +376,12 @@ Label(root).pack()
 Label(root, text="-----------------------------------------------------------------------").pack()
 Label(root).pack()
 Label(root).pack()
-message = Label(root, text="Downloaded content")
+''' label to display the download message status '''
+message = Label(root, text="Messages")
 message['font'] = myFont
 message.pack()
 Label(root).pack()
+''' scrollable display to show queue messages '''
 scrollbar = Scrollbar(root)
 scrollbar.pack(side=RIGHT, fill=Y)
 mylist = Listbox(root, yscrollcommand=scrollbar.set)
@@ -343,7 +390,8 @@ scrollbar.config(command=mylist.yview)
 ''' empty label to have some space between the components on GUI '''
 Label(root).pack()
 
-
+''' call this update function every 50 ms so it will update
+the information on GUI '''
 def update():
     message1.config(text=upload_msg)
     if(t.code == 404):
@@ -361,7 +409,6 @@ def update():
         cname.config(text="client name :- " + t.name_client)
         status.config(text="Server is online")
         uploadb.pack()
-        Label(root).pack()
         downloadb.pack()
     elif(t.code == 200):
         ''' if we got code 200 from server then everything
@@ -370,7 +417,6 @@ def update():
         cname.config(text="client name :- " + t.name_client)
         status.config(text="Server is online")
         uploadb.pack()
-        Label(root).pack()
         downloadb.pack()
     elif(t.code == 403):
         ''' if we got code 403 from server then client j
@@ -380,7 +426,6 @@ def update():
         status.config(text="Server is not available at the moment")
         uploadb.pack_forget()
         downloadb.pack_forget()
-    ''' call update function after every 50 ms '''
     root.after(50, update)
 
 
