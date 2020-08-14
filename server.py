@@ -26,7 +26,7 @@ count = 1
 from the client '''
 upload_message = "No upload request"
 download_message = "No download request"
-''' comparision dictionary for conversion at server side '''
+'''  dictionary for conversion at server side '''
 conversion_dict = {}
 ''' initially have a empty dictionary '''
 empty_dict = "{\"A\":{\"data\":[]},\"B\":{\"data\":[]},\"C\":{\"data\":[]}}"
@@ -100,6 +100,7 @@ class myThread(threading.Thread):
                     if(self.msg == 100):
                         signal_disconnected = ""
                         self.msg = "201" + ":" + str(count)
+                        ''' send the no of connected client so client can pick a name in series '''
                         count = count + 1
                     ''' send the signal to client '''
                     data = pickle.dumps(self.msg)
@@ -134,6 +135,7 @@ class myThread(threading.Thread):
                             download_message = self.n + " polled for queue " + queue
                         # if queue is empty then just send message as queue is empty
                         else:
+                            download_message = self.n + " polled for queue " + queue
                             self.msg = "download-"+"Queue is empty"
                         ''' set the queue to empty if client read data from queue '''
                         queue_data[queue]["data"] = []
@@ -170,7 +172,7 @@ class myThread(threading.Thread):
                         fr.write(json.dumps(queue_data))
                         fr.close()
                         ''' display the message to be pushed on queue on GUI '''
-                        upload_message = "message to be pushed on queue " + \
+                        upload_message = str(number)+" to be pushed on queue " + \
                             queue + "\n\n\n\n" + display_str
 
                     else:

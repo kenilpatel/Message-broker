@@ -15,7 +15,7 @@ from tkinter import font
 from tkinter import simpledialog
 ''' Started the GUI '''
 root = Tk()
-''' This vaiable stores the name of client and sends it to server'''
+''' this vaiable stores the name of client and sends it to server'''
 name = StringVar()
 ''' this variable stores the information about download message request '''
 download = 0
@@ -107,6 +107,7 @@ class myThread(threading.Thread):
                         if(download == 1):
                             download = 0
                             data = pickle.dumps("download:" + queue)
+                        # upload to server
                         elif(upload == 1):
                             upload = 0
                             data = pickle.dumps(
@@ -227,6 +228,7 @@ def call_c():
 def call_a1():
     global queue, download
     download = 1
+    ''' set queue '''
     queue = "A"
     data_frame.destroy()
 
@@ -237,6 +239,7 @@ def call_a1():
 def call_b1():
     global queue, download
     download = 1
+    ''' set queue '''
     queue = "B"
     data_frame.destroy()
 
@@ -247,6 +250,7 @@ def call_b1():
 def call_c1():
     global queue, download
     download = 1
+    ''' set queue '''
     queue = "C"
     data_frame.destroy()
 

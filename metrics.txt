@@ -2,24 +2,25 @@
   "A":{
 
       "Kilometer":0.001,
-      "Astronomical Unit":0.1496,
-      "Meter":1,
+      "Astronomical Unit":3.24078e-17,
+      "Mile":0.000621371,
       "Millimeter":1000,
       "Centimeter":100
 
     },
     "B":{
-      "Parsec":0.3247,
-      "Light Year":39.37,
-      "Inch":39.37,
+    	"Inch":39.37,
+      "Parsec":0.324078,
+      "Light Year":0.1057,
       "Foot":3.28084,
       "Yard":1.09361
     },
     "C":{
-      "Mile":0.000621371,
-      "Nautical Mile":0.000539957,
-      "American football field":0.009111,
+
+      "Meter":1,
+      "Nautical Mile":0.539957,
+      "American football field":0.01094,
       "Hand":9.84252,
-      "Horse":157
+      "Horse":0.41666666666667
     }
 }
